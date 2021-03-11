@@ -3,16 +3,19 @@ import { Link } from 'gatsby';
 import Img from 'gatsby-image';
 import styled from 'styled-components';
 
+// This style makes the grid (duh)
 const PizzaGridStyles = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 4rem;
+  /* auto is title, 2nd auto is topping and 3rd is the image */
   grid-auto-rows: auto auto 500px;
 `;
 
+// this style aligns everything properly based on the parent
 const PizzaStyles = styled.div`
   display: grid;
-  /* Take your row sizing not from the pizzaStyles div, but from the  PizzaGridStyles grid */
+  /* Take your row sizing not from the pizzaStyles div, but from the  PizzaGridStyles grid.*/
   @supports not (grid-template-rows: subgrid) {
     --rows: auto auto 1fr;
   }
