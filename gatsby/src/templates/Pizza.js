@@ -4,16 +4,26 @@ import React from 'react';
 import Img from 'gatsby-image';
 import styled from 'styled-components';
 
+const PizzaGrid = styled.div`
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+`;
+
 export default function SinglePizzaPage({ data: { pizza } }) {
-  console.log(data);
+  console.log(pizza);
 
   return (
     <>
       <Img fluid={pizza.image.asset.fluid} alt={pizza.name} />
-      <div>
-        <h2>Single Pizza: {pizza.name}</h2>
-        <p>{pizza.toppings.map((topping) => topping.name).join(', ')}</p>
-      </div>
+      <PizzaGrid>
+        <h2 className="mark">{pizza.name}</h2>
+        <ul>
+          {pizza.toppings.map((topping) => (
+            <li key={topping.id}> {topping.name}</li>
+          ))}
+        </ul>
+      </PizzaGrid>
     </>
   );
 }
