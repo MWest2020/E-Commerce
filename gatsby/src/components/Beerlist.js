@@ -9,29 +9,31 @@ const BeerStyles = styled.div`
   gap: 4rem;
 `;
 
-const BeerGridStyles = styled.div``;
-
-function SingleBeer({ beer }) {
-  console.log({ beer });
-  return (
-    <BeerStyles>
-      <h2 className="center">
-        <span className="mark">{beer.name}</span>
-      </h2>
-      <img src={beer.image} alt={beer.name} />
-      {/* <h3>{beer.rating.average}</h3>
-      <h3>{beer.rating.reviews}</h3> */}
-    </BeerStyles>
-  );
-}
-
 export default function Beerlist({ beers }) {
   return (
-    <BeerGridStyles>
-      <h2>We got {beers.length} Beers to chose from</h2>
-      {beers.map((beer) => (
-        <SingleBeer key={beer.index} beer={beer} />
-      ))}
-    </BeerGridStyles>
+    <>
+      <h2 className="center">
+        We got {beers.length} Beers to chose from. Dine in Only!
+      </h2>
+      <div>
+        {beers.map((beer) => {
+          const rating = Math.round(beer.rating.average);
+          return (
+            <BeerStyles>
+              <img src={beer.image} alt={beer.name} />
+              <h3 className="mark">{beer.name}</h3>
+              {beer.price}
+              <p title={`${rating} out of 5 stars`}>
+                {`⭐`.repeat(rating)}
+                <span style={{ filter: `grayscale(100%)` }}>
+                  {`⭐`.repeat(5 - rating)}
+                </span>
+                <span>{beer.rating.reviews}</span>
+              </p>
+            </BeerStyles>
+          );
+        })}
+      </div>
+    </>
   );
 }

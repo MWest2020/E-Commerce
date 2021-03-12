@@ -1,11 +1,10 @@
-// this file loads after gatsby gathers all data, before building the actual pages
-import path from 'path'; // node api import
-import fetch from 'isomorphic-fetch'; // needs isomorphic import because we are working in node, and not the browser. Check to replace with axios
+import path, { resolve } from 'path';
+import fetch from 'isomorphic-fetch';
 
 async function turnPizzasIntoPages({ graphql, actions }) {
-  // template for this page
+  // 1. Get a template for this page
   const pizzaTemplate = path.resolve('./src/templates/Pizza.js');
-  // query all pizzas
+  // 2. Query all pizzas
   const { data } = await graphql(`
     query {
       pizzas: allSanityPizza {
@@ -18,14 +17,12 @@ async function turnPizzasIntoPages({ graphql, actions }) {
       }
     }
   `);
-  // loop over pizzas and create a page for the pizza
-  // forEach, not returning data
+  // 3. Loop over each pizza and create a page for that pizza
   data.pizzas.nodes.forEach((pizza) => {
     actions.createPage({
-      // url for page
+      // What is the URL for this new page??
       path: `pizza/${pizza.slug.current}`,
       component: pizzaTemplate,
-      // pass data-like attributes (props) to template via context
       context: {
         slug: pizza.slug.current,
       },
@@ -34,9 +31,9 @@ async function turnPizzasIntoPages({ graphql, actions }) {
 }
 
 async function turnToppingsIntoPages({ graphql, actions }) {
-  // template for this page
+  // 1. Get the template
   const toppingTemplate = path.resolve('./src/pages/pizzas.js');
-  // query all toppings
+  // 2. query all the toppings
   const { data } = await graphql(`
     query {
       toppings: allSanityTopping {
@@ -47,21 +44,19 @@ async function turnToppingsIntoPages({ graphql, actions }) {
       }
     }
   `);
-  // loop over toppings and create a page for the topping
-  // forEach, not returning data
+  // 3. createPage for that topping
   data.toppings.nodes.forEach((topping) => {
     actions.createPage({
-      // url for page
       path: `topping/${topping.name}`,
       component: toppingTemplate,
-      // pass data-like attributes (props) to template via context
       context: {
         topping: topping.name,
-        // REGEX
+        // TODO Regex for Topping
         toppingRegex: `/${topping.name}/i`,
       },
     });
   });
+  // 4. Pass topping data to pizza.js
 }
 
 async function fetchBeersAndTurnIntoNodes({
@@ -69,12 +64,13 @@ async function fetchBeersAndTurnIntoNodes({
   createNodeId,
   createContentDigest,
 }) {
-  // fetch list of beers
+  // 1. Fetch a  list of beers
   const res = await fetch('https://api.sampleapis.com/beers/ale');
   const beers = await res.json();
-  console.log(beers);
-  // loop over each one
+  // 2. Loop over each one
   for (const beer of beers) {
+    // create a node for each beer
+    if (!beer.name) return;
     const nodeMeta = {
       id: createNodeId(`beer-${beer.name}`),
       parent: null,
@@ -85,26 +81,78 @@ async function fetchBeersAndTurnIntoNodes({
         contentDigest: createContentDigest(beer),
       },
     };
+    // 3. Create a node for that beer
     actions.createNode({
       ...beer,
       ...nodeMeta,
     });
   }
-  // create a node for that beers
+}
+
+async function turnSlicemastersIntoPages({ graphql, actions }) {
+  // 1. Query all slicemasters
+  const { data } = await graphql(`
+    query {
+      slicemasters: allSanityPerson {
+        totalCount
+        nodes {
+          name
+          id
+          slug {
+            current
+          }
+        }
+      }
+    }
+  `);
+  // TODO: 2. Turn each slicemaster into their own page (TODO)
+  data.slicemasters.nodes.forEach((slicemaster) => {
+    actions.createPage({
+      component: resolve('./src/templates/Slicemaster.js'),
+      path: `/slicemaster/${slicemaster.slug.current}`,
+      context: {
+        name: slicemaster.person,
+        slug: slicemaster.slug.current,
+      },
+    });
+  });
+
+  // 3. Figure out how many pages there are based on how many slicemasters there are, and how many per page!
+  const pageSize = parseInt(process.env.GATSBY_PAGE_SIZE);
+  const pageCount = Math.ceil(data.slicemasters.totalCount / pageSize);
+  console.log(
+    `There are ${data.slicemasters.totalCount} total people. And we have ${pageCount} pages with ${pageSize} per page`
+  );
+  // 4. Loop from 1 to n and create the pages for them
+  Array.from({ length: pageCount }).forEach((_, i) => {
+    console.log(`Creating page ${i}`);
+    actions.createPage({
+      path: `/slicemasters/${i + 1}`,
+      component: path.resolve('./src/pages/slicemasters.js'),
+      // This data is pass to the template when we create it
+      context: {
+        skip: i * pageSize,
+        currentPage: i + 1,
+        pageSize,
+      },
+    });
+  });
 }
 
 export async function sourceNodes(params) {
-  // fetch list of beers nad source them in our gatsby app
+  // fetch a list of beers and source them into our gatsby API!
   await Promise.all([fetchBeersAndTurnIntoNodes(params)]);
 }
 
 export async function createPages(params) {
-  // create pages dynamically
+  // Create pages dynamically
+  // Wait for all promises to be resolved before finishing this function
   await Promise.all([
-    // Pizzas
     turnPizzasIntoPages(params),
-    // toppings
     turnToppingsIntoPages(params),
-    // Slicemasters
+    turnSlicemastersIntoPages(params),
   ]);
+  // 1. Pizzas
+  // 2. Toppings
+  // 3. Slicemasters
 }
