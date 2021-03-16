@@ -1,6 +1,7 @@
 import React from 'react';
 import { graphql } from 'gatsby';
 import styled from 'styled-components';
+import SEO from '../components/SEO';
 
 // auto-fit is the core of the responsive styling
 const BeerGridStyles = styled.div`
@@ -26,6 +27,9 @@ const SingleBeerStyles = styled.div`
 export default function BeersPage({ data }) {
   return (
     <>
+      <SEO
+        title={`Brewski's! We have ${data.beers.nodes.length} cold ones waiting for you.`}
+      />
       <h2 className="center">
         We have {data.beers.nodes.length} Beers Available. Dine in Only!
       </h2>

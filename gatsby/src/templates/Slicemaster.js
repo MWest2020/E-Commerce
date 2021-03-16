@@ -1,10 +1,15 @@
 import React from 'react';
 import { graphql } from 'gatsby';
 import Img from 'gatsby-image';
+import SEO from '../components/SEO';
 
 export default function SlicemasterPage({ data: { slicemaster } }) {
   return (
     <>
+      <SEO
+        title={`${slicemaster.name} is preparing your pizza!`}
+        image={slicemaster.image?.asset?.src}
+      />
       <div className="center">
         <Img fluid={slicemaster.image.asset.fluid} />
         <h2>
