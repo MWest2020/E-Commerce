@@ -1,14 +1,14 @@
 import { useState, useContext } from 'react';
 import OrderContext from '../components/OrderContext';
-import attachNamesAndPrices from './attachNamesAndPrices';
 import calculateOrderTotal from './calculateOrderTotal';
 import formatMoney from './formatMoney';
+import attachNamesAndPrices from './attachNamesAndPrices';
 
-// name values credentials. That's what they are.
 export default function usePizza({ pizzas, values }) {
   // 1. Create some state to hold our order
-  // Commented put the state line. We move state up to the provider and can acces it now via context
+  // We got rid of this line because we moved useState up to the provider
   // const [order, setOrder] = useState([]);
+  // Now we access both our state and our updater function (setOrder) via context
   const [order, setOrder] = useContext(OrderContext);
   const [error, setError] = useState();
   const [loading, setLoading] = useState(false);
@@ -27,28 +27,30 @@ export default function usePizza({ pizzas, values }) {
       ...order.slice(index + 1),
     ]);
   }
-  // 4. Send this data the a serverless function when they check out
 
-  async function submitOrder(event) {
-    event.preventDefault();
+  // this is the function that is run when someone submits the form
+  async function submitOrder(e) {
+    e.preventDefault();
+    console.log(e);
     setLoading(true);
     setError(null);
-    setMessage('Bon Appetit!');
+    // setMessage('Go eat!');
 
-    // gather order data
+    // gather all the data
     const body = {
       order: attachNamesAndPrices(order, pizzas),
       total: formatMoney(calculateOrderTotal(order, pizzas)),
       name: values.name,
       email: values.email,
+      mapleSyrup: values.mapleSyrup,
     };
-    console.log(body);
+    // 4. Send this data the a serevrless function when they check out
     const res = await fetch(
       `${process.env.GATSBY_SERVERLESS_BASE}/placeOrder`,
       {
         method: 'POST',
         headers: {
-          'Content-type': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
       }
@@ -57,15 +59,14 @@ export default function usePizza({ pizzas, values }) {
 
     // check if everything worked
     if (res.status >= 400 && res.status < 600) {
-      setLoading(false);
+      setLoading(false); // turn off loading
       setError(text.message);
     } else {
+      // it worked!
       setLoading(false);
-      setMessage('Succes! Come down and get your Pizza!');
+      setMessage('Success! Come on down for your pizza');
     }
   }
-
-  // TODO
 
   return {
     order,

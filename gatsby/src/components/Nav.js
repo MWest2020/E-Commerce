@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import Logo from './Logo';
 
 const NavStyles = styled.nav`
-  margin-bottom: 3rem;
+  /* margin-bottom: 3rem; */
   .logo {
     transform: translateY(-25%);
   }
@@ -42,9 +42,9 @@ const NavStyles = styled.nav`
     &:hover {
       color: var(--red);
     }
-    &[aria-current='page'] {
+    /* &[aria-current='page'] {
       color: var(--red);
-    }
+    } */
   }
 `;
 
@@ -53,10 +53,10 @@ export default function Nav() {
     <NavStyles>
       <ul>
         <li>
-          <Link to="/pizzas/">Pizza Menu</Link>
+          <Link to="/">Hot Now</Link>
         </li>
         <li>
-          <Link to="/beers">Brewski's</Link>
+          <Link to="/pizzas/">Pizza Menu</Link>
         </li>
         <li>
           <Link to="/">
